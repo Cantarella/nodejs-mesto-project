@@ -8,7 +8,6 @@ export interface SessionRequest extends Request {
 
 export function checkAuthorization(req: Request, res: Response, next: NextFunction) {
   const { authorization } = req.headers;
-  console.log(authorization);
   if (!authorization || !authorization.startsWith('Bearer ')) {
     return res.send(new Error401('Необходима авторизация'));
   }

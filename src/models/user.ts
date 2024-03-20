@@ -1,6 +1,7 @@
-import { model, Model, Schema, Document } from 'mongoose';
+import {
+  model, Model, Schema, Document,
+} from 'mongoose';
 import bcrypt from 'bcryptjs';
-import Error401 from '../helpers/errors/Error401';
 
 export interface IUser {
   name: string,
@@ -11,6 +12,7 @@ export interface IUser {
 }
 
 interface UserModel extends Model<IUser> {
+  // eslint-disable-next-line no-unused-vars
   findUserByCredentials: (email: string, password: string) => Promise<Document<unknown, any, IUser>>
 }
 

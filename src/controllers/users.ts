@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import isEmail from 'validator/lib/isEmail';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import {SessionRequest} from "../middlewares/auth";
+import { SessionRequest } from '../middlewares/auth';
 import User from '../models/user';
 import Error404 from '../helpers/errors/Error404';
 import Error400 from '../helpers/errors/Error400';
@@ -12,16 +12,15 @@ export const getAllUsers = (req: Request, res: Response) => User.find({})
   .then((users) => res.send({ data: users }))
   .catch((err) => res.status(500).send(err));
 
-export const getUserById = (req: Request, res: Response, next: NextFunction) => {
-  return User.findById(req.params.userId)
-    .then((user) => {
-      if (!user) {
-        throw new Error404('Пользователь с указанным _id не найден');
-      }
-      res.send({ data: user });
-    })
-    .catch(() => next(new Error404('Пользователь по указанному _id не найден')));
-};
+// eslint-disable-next-line max-len
+export const getUserById = (req: Request, res: Response, next: NextFunction) => User.findById(req.params.userId)
+  .then((user) => {
+    if (!user) {
+      throw new Error404('Пользователь с указанным _id не найден');
+    }
+    res.send({ data: user });
+  })
+  .catch(() => next(new Error404('Пользователь по указанному _id не найден')));
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   const {
