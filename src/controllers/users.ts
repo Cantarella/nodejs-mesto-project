@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import isEmail from 'validator/lib/isEmail';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import {SessionRequest} from "../middlewares/auth";
 import User from '../models/user';
 import Error404 from '../helpers/errors/Error404';
 import Error400 from '../helpers/errors/Error400';
@@ -43,10 +44,17 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
   return next(new Error400('Такой пользователь уже есть в системе'));
 };
 
-export const getUserData = () => {};
-export const login = async (req: Request, res: Response, next: NextFunction) => {
+export const getUserData = (req: Request, res: Response, next: NextFunction) => {
+  const { userId } = req.params;
+  return User.findOne({ _id: userId }).then((user) => {
+    res.send(user);
+  })
+    .catch(() => next(new Error404('Пользователь не найден')));
+};
+
+export const login = (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
-  User.findUserByCredentials(email, password).then((user: any) => {
+  return User.findUserByCredentials(email, password).then((user: any) => {
     const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '1d' });
     res.send({
       token,
@@ -66,16 +74,17 @@ export const updateUser = (req: Request, res: Response) => {
     .catch((err) => res.status(400).send(err));
 };
 
-export const updateAvatar = (req: Request, res: Response, next: NextFunction) => {
-  const {
-    avatar,
-  } = req.body;
-  return User.findOneAndUpdate({ _id: req.body.user._id }, { avatar })
-    .then((user) => {
-      if (!user) {
-        throw new Error404('Пользователь с указанным _id не найден');
-      }
-      res.send({ data: 'Аватар успешно изменен' });
-    })
-    .catch(() => next(new Error400('Переданы некорректные данные при обновлении аватара')));
+export const updateAvatar = (req: SessionRequest, res: Response, next: NextFunction) => {
+  if (req.user) {
+    const { avatar } = req.body;
+    const { id: userId } = req.user;
+    return User.findOneAndUpdate({ _id: userId }, { avatar })
+      .then((user) => {
+        if (!user) {
+          throw new Error404('Пользователь с указанным _id не найден');
+        }
+        res.send({ data: 'Аватар успешно изменен' });
+      })
+      .catch(() => next(new Error400('Переданы некорректные данные при обновлении аватара')));
+  }
 };

@@ -1,7 +1,7 @@
 class Error404 extends Error {
   statusCode: number;
 
-  message = 'карточка или пользователь не найден';
+  message = 'запрошенный ресурс не найден';
 
   constructor(message: string) {
     super(message);

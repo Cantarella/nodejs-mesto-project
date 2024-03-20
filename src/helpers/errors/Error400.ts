@@ -1,7 +1,7 @@
 class Error400 extends Error {
   statusCode: number;
 
-  message = 'карточка или пользователь не найден';
+  message = 'Некорректно сконструирован запрос';
 
   constructor(message: string) {
     super(message);

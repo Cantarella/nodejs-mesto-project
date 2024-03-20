@@ -41,25 +41,30 @@ const userSchema = new Schema<IUser, UserModel>({
   },
   avatar: {
     type: String,
+    validate: {
+      validator(v: string) {
+        return /^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*$/.test(v);
+      },
+      message: (props) => `${props.value} не валидная ссылка на аватар`,
+    },
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     required: true,
   },
 });
 
 userSchema.static('findUserByCredentials', function findUserByCredentials(email: string, password: string) {
-  return this.findOne({ email }).then((user) => {
-    if (!user) {
-      return Promise.reject(new Error401('Неправильные почта или пароль'));
-    }
-
-    return bcrypt.compare(password, user.password).then((matched) => {
-      if (!matched) {
-        return Promise.reject(new Error401('Неправильные почта или пароль'));
+  return this.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        return Promise.reject(new Error('Неправильные почта или пароль'));
       }
-
-      return user;
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          return Promise.reject(new Error('Неправильные почта или пароль'));
+        }
+        return user;
+      });
     });
-  });
 });
 
 export default model<IUser, UserModel>('User', userSchema);
