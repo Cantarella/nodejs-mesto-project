@@ -1,3 +1,5 @@
+import * as http2 from 'http2';
+
 class Error400 extends Error {
   statusCode: number;
 
@@ -5,7 +7,7 @@ class Error400 extends Error {
 
   constructor(message: string) {
     super(message);
-    this.statusCode = 400;
+    this.statusCode = http2.constants.HTTP_STATUS_BAD_REQUEST;
     if (message) this.message = message;
   }
 }

@@ -1,3 +1,5 @@
+import * as http2 from 'http2';
+
 class Error404 extends Error {
   statusCode: number;
 
@@ -5,7 +7,7 @@ class Error404 extends Error {
 
   constructor(message: string) {
     super(message);
-    this.statusCode = 404;
+    this.statusCode = http2.constants.HTTP_STATUS_NOT_FOUND;
     if (message) this.message = message;
   }
 }
