@@ -54,7 +54,7 @@ export const getUserData = (req: Request, res: Response, next: NextFunction) => 
 export const login = (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password).then((user: any) => {
-    const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { });
+    const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '1d' });
     res
       .send({
         token,
