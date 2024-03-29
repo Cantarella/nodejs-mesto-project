@@ -69,4 +69,4 @@ userSchema.static('findUserByCredentials', function findUserByCredentials(email:
     });
 });
 
-export default model<IUser, UserModel>('User', userSchema);
+export default model<IUser, UserModel>('user', userSchema);

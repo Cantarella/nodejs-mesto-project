@@ -30,6 +30,7 @@ usersRouter.get('/me', celebrate({
 }), getUserData);
 usersRouter.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
+    userId: Joi.string().required(),
     avatar: Joi.string().required(),
   }),
 }), updateAvatar);

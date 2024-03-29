@@ -2,15 +2,15 @@ import { NextFunction, Request, Response } from 'express';
 import isEmail from 'validator/lib/isEmail';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import Error500 from '../helpers/errors/Error500';
 import { SessionRequest } from '../middlewares/auth';
 import User from '../models/user';
 import Error404 from '../helpers/errors/Error404';
 import Error400 from '../helpers/errors/Error400';
-import Error401 from '../helpers/errors/Error401';
 
-export const getAllUsers = (req: Request, res: Response) => User.find({})
+export const getAllUsers = (req: Request, res: Response, next: NextFunction) => User.find({})
   .then((users) => res.send({ data: users }))
-  .catch((err) => res.status(500).send(err));
+  .catch(next);
 
 // eslint-disable-next-line max-len
 export const getUserById = (req: Request, res: Response, next: NextFunction) => User.findById(req.params.userId)
@@ -20,7 +20,7 @@ export const getUserById = (req: Request, res: Response, next: NextFunction) => 
     }
     res.send({ data: user });
   })
-  .catch(() => next(new Error404('Пользователь по указанному _id не найден')));
+  .catch(next);
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   const {
@@ -40,7 +40,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
       .then((user) => res.send({ data: user }))
       .catch((err) => next(new Error400(`Переданы некорректные данные при создании пользователя: ${err}`)));
   }
-  return next(new Error400('Такой пользователь уже есть в системе'));
+  return next(new Error500('Такой пользователь уже есть в системе'));
 };
 
 export const getUserData = (req: Request, res: Response, next: NextFunction) => {
@@ -48,29 +48,29 @@ export const getUserData = (req: Request, res: Response, next: NextFunction) => 
   return User.findOne({ _id: userId }).then((user) => {
     res.send(user);
   })
-    .catch(() => next(new Error404('Пользователь не найден')));
+    .catch(next);
 };
 
 export const login = (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password).then((user: any) => {
-    const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '1d' });
-    res.send({
-      token,
-    });
+    const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { });
+    res
+      .send({
+        token,
+      });
   })
-    .catch(() => next(new Error401('Неправильные почта или пароль')));
+    .catch(next);
 };
 
-export const updateUser = (req: Request, res: Response) => {
+export const updateUser = (req: Request, res: Response, next: NextFunction) => {
   const {
     name,
     about,
-    avatar,
   } = req.body;
-  return User.findOneAndUpdate({ _id: req.body.user._id }, { name, about, avatar })
+  return User.findOneAndUpdate({ _id: req.body.user._id }, { name, about })
     .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(400).send(err));
+    .catch(next);
 };
 
 export const updateAvatar = (req: SessionRequest, res: Response, next: NextFunction) => {
@@ -82,8 +82,8 @@ export const updateAvatar = (req: SessionRequest, res: Response, next: NextFunct
         if (!user) {
           throw new Error404('Пользователь с указанным _id не найден');
         }
-        res.send({ data: 'Аватар успешно изменен' });
+        res.send({ data: user });
       })
-      .catch(() => next(new Error400('Переданы некорректные данные при обновлении аватара')));
+      .catch(next);
   }
 };

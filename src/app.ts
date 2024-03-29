@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { celebrate, errors, Joi } from 'celebrate';
 import usersRouter from './routes/users';
@@ -7,9 +7,19 @@ import cardsRouter from './routes/cards';
 import { createUser, login } from './controllers/users';
 import { requestLogger, errorLogger } from './middlewares/logger';
 
+const cookieParser = require('cookie-parser');
+
 const app = express();
 const { PORT = 3000 } = process.env;
-
+const allowCors = (req: Request, res: Response, next: any) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  next();
+};
+app.use(cookieParser());
+app.use(allowCors);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 mongoose.connect('mongodb://localhost:27017/mestodb');
