@@ -13,7 +13,7 @@ const usersRouter = Router();
 usersRouter.get('', getAllUsers);
 usersRouter.get('/:userId', celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().required(),
+    userId: Joi.string().required(),
   }),
 }), getUserById);
 usersRouter.patch('/me', celebrate({
@@ -30,6 +30,7 @@ usersRouter.get('/me', celebrate({
 }), getUserData);
 usersRouter.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
+    userId: Joi.string().required(),
     avatar: Joi.string().required(),
   }),
 }), updateAvatar);

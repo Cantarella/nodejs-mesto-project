@@ -1,15 +1,25 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
+import http2 from 'http2';
 import mongoose from 'mongoose';
 import { celebrate, errors, Joi } from 'celebrate';
-import usersRouter from './routes/users';
 import { checkAuthorization } from './middlewares/auth';
-import cardsRouter from './routes/cards';
 import { createUser, login } from './controllers/users';
+import { cardsRouter, usersRouter } from './routes';
 import { requestLogger, errorLogger } from './middlewares/logger';
+
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const { PORT = 3000 } = process.env;
-
+const allowCors = (req: Request, res: Response, next: any) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  next();
+};
+app.use(cookieParser());
+app.use(allowCors);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 mongoose.connect('mongodb://localhost:27017/mestodb');
@@ -34,8 +44,23 @@ app.use(errorLogger);
 
 app.use(errors());
 app.use((err: any, req: express.Request, res: express.Response) => {
-  const { statusCode = 500, message } = err;
+  const databaseErors = {
+    ValidationError: 'Данные не прошли валидацию',
+    CastError: 'Невалидный id записи',
+    DocumentNotFoundError: 'В базе данных не найдена запись подходящая по параметрам запроса',
+  };
+  // eslint-disable-next-line prefer-const
+  let { statusCode = 500, message } = err;
+  type tDatabaseErrorKey = keyof typeof databaseErors;
 
+  const databaseErrorsKeys: tDatabaseErrorKey[] = Object.keys(databaseErors) as tDatabaseErrorKey[];
+  databaseErrorsKeys.forEach((item: tDatabaseErrorKey) => {
+    const currentKey: tDatabaseErrorKey = item;
+    if (err.stack.includes(currentKey)) {
+      statusCode = http2.constants.HTTP_STATUS_NOT_FOUND;
+      message = databaseErors[item];
+    }
+  });
   res
     .status(statusCode)
     .send({
@@ -46,6 +71,9 @@ app.use((err: any, req: express.Request, res: express.Response) => {
           ? 'Создание дублирующей записи'
           : message,
     });
+});
+app.use((req, res) => {
+  res.sendStatus(http2.constants.HTTP_STATUS_NOT_FOUND);
 });
 app.listen(PORT, () => {
 });

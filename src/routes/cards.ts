@@ -11,6 +11,7 @@ cardsRouter.post('', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required(),
     link: Joi.string().required(),
+    owner: Joi.string().required(),
   }),
 }), createCard);
 cardsRouter.delete(
