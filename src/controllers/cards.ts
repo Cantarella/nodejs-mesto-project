@@ -4,13 +4,14 @@ import Card from '../models/card';
 import Error404 from '../helpers/errors/Error404';
 import { SessionRequest } from '../middlewares/auth';
 
-export const getCards = (req: Request, res: Response, next: NextFunction) => Card.find({})
+export const getCards = async (req: Request, res: Response, next: NextFunction) => Card.find({})
+  .orFail()
   .then((cards) => res.send({ data: cards }))
   .catch(next);
 
-export const createCard = (req: Request, res: Response, next: NextFunction) => {
+export const createCard = (req: SessionRequest, res: Response, next: NextFunction) => {
   const { name, link } = req.body;
-  const owner = req.body.user._id;
+  const { owner } = req.body;
   return Card.create({ name, link, owner })
     .then((card) => {
       const { HTTP_STATUS_CREATED } = constants;
@@ -37,6 +38,7 @@ export const addLikeToCard = (req: SessionRequest, res: Response, next: NextFunc
     const { id: userId } = req.user;
     const { cardId } = req.params;
     return Card.updateOne({ _id: cardId }, { $addToSet: { likes: userId } }, { new: true })
+      .orFail()
       .then((card) => {
         if (!card) throw new Error404('Передан несуществующий _id карточки');
         res.send({ data: 'Лайк поставлен' });
@@ -50,6 +52,7 @@ export const dislike = (req: SessionRequest, res: Response, next: NextFunction) 
     const { id: userId } = req.user;
     const { cardId } = req.params;
     return Card.updateOne({ _id: cardId }, { $pull: { likes: userId } }, { new: true })
+      .orFail()
       .then((card) => {
         if (!card) throw new Error404('Передан несуществующий _id карточки');
         res.send({ data: 'Лайк отменён' });

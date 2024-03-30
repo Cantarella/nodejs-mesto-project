@@ -37,19 +37,28 @@ app.post('/signin', celebrate({
     password: Joi.string().required().min(8).max(16),
   }),
 }), login);
-app.use(checkAuthorization);
+// app.use(checkAuthorization);
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 app.use(errorLogger);
 
 app.use(errors());
 app.use((err: any, req: express.Request, res: express.Response) => {
-  const databaseErors = ['ValidationError', 'CastError', 'DocumentNotFoundError'];
+  const databaseErors = {
+    ValidationError: 'Данные не прошли валидацию',
+    CastError: 'Невалидный id записи',
+    DocumentNotFoundError: 'В базе данных не найдена запись подходящая по параметрам запроса',
+  };
   // eslint-disable-next-line prefer-const
   let { statusCode = 500, message } = err;
-  for (let i = 0, c = databaseErors.length; i < c; i++) {
-    if (err.stack.includes(databaseErors[i])) {
+  type tDatabaseErrorKey = keyof typeof databaseErors;
+
+  const databaseErrorsKeys: tDatabaseErrorKey[] = Object.keys(databaseErors) as tDatabaseErrorKey[];
+  for (let i = 0, c = databaseErrorsKeys.length; i < c; i++) {
+    const currentKey: tDatabaseErrorKey = databaseErrorsKeys[i];
+    if (err.stack.includes(currentKey)) {
       statusCode = http2.constants.HTTP_STATUS_NOT_FOUND;
+      message = databaseErors[databaseErrorsKeys[i]];
     }
   }
 

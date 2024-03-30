@@ -42,9 +42,11 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 
 export const getUserData = (req: Request, res: Response, next: NextFunction) => {
   const { userId } = req.params;
-  return User.findOne({ _id: userId }).then((user) => {
-    res.send(user);
-  })
+  return User.findOne({ _id: userId })
+    .orFail()
+    .then((user) => {
+      res.send(user);
+    })
     .catch(next);
 };
 
@@ -70,6 +72,7 @@ export const updateUser = (req: Request, res: Response, next: NextFunction) => {
     { name, about },
     { new: true, runValidators: true },
   )
+    .orFail()
     .then((user) => res.send({ data: user }))
     .catch(next);
 };
@@ -83,6 +86,7 @@ export const updateAvatar = (req: SessionRequest, res: Response, next: NextFunct
       { avatar },
       { new: true, runValidators: true },
     )
+      .orFail()
       .then((user) => {
         if (!user) {
           throw new Error404('Пользователь с указанным _id не найден');
