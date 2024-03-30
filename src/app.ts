@@ -2,10 +2,9 @@ import express, { Request, Response } from 'express';
 import http2 from 'http2';
 import mongoose from 'mongoose';
 import { celebrate, errors, Joi } from 'celebrate';
-import usersRouter from './routes/users';
 import { checkAuthorization } from './middlewares/auth';
-import cardsRouter from './routes/cards';
 import { createUser, login } from './controllers/users';
+import { cardsRouter, usersRouter } from './routes';
 import { requestLogger, errorLogger } from './middlewares/logger';
 
 const cookieParser = require('cookie-parser');
