@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import http2 from 'http2';
 import mongoose from 'mongoose';
 import { celebrate, errors, Joi } from 'celebrate';
 import usersRouter from './routes/users';
@@ -44,7 +45,14 @@ app.use(errorLogger);
 
 app.use(errors());
 app.use((err: any, req: express.Request, res: express.Response) => {
-  const { statusCode = 500, message } = err;
+  const databaseErors = ['ValidationError', 'CastError', 'DocumentNotFoundError'];
+  // eslint-disable-next-line prefer-const
+  let { statusCode = 500, message } = err;
+  for (let i = 0, c = databaseErors.length; i < c; i++) {
+    if (err.stack.includes(databaseErors[i])) {
+      statusCode = http2.constants.HTTP_STATUS_NOT_FOUND;
+    }
+  }
 
   res
     .status(statusCode)
@@ -56,6 +64,9 @@ app.use((err: any, req: express.Request, res: express.Response) => {
           ? 'Создание дублирующей записи'
           : message,
     });
+});
+app.use((req, res) => {
+  res.sendStatus(http2.constants.HTTP_STATUS_NOT_FOUND);
 });
 app.listen(PORT, () => {
 });

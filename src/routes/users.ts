@@ -13,7 +13,7 @@ const usersRouter = Router();
 usersRouter.get('', getAllUsers);
 usersRouter.get('/:userId', celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().required(),
+    userId: Joi.string().required(),
   }),
 }), getUserById);
 usersRouter.patch('/me', celebrate({
