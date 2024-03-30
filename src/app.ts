@@ -37,7 +37,7 @@ app.post('/signin', celebrate({
     password: Joi.string().required().min(8).max(16),
   }),
 }), login);
-// app.use(checkAuthorization);
+app.use(checkAuthorization);
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 app.use(errorLogger);
@@ -54,14 +54,13 @@ app.use((err: any, req: express.Request, res: express.Response) => {
   type tDatabaseErrorKey = keyof typeof databaseErors;
 
   const databaseErrorsKeys: tDatabaseErrorKey[] = Object.keys(databaseErors) as tDatabaseErrorKey[];
-  for (let i = 0, c = databaseErrorsKeys.length; i < c; i++) {
-    const currentKey: tDatabaseErrorKey = databaseErrorsKeys[i];
+  databaseErrorsKeys.forEach((item: tDatabaseErrorKey) => {
+    const currentKey: tDatabaseErrorKey = item;
     if (err.stack.includes(currentKey)) {
       statusCode = http2.constants.HTTP_STATUS_NOT_FOUND;
-      message = databaseErors[databaseErrorsKeys[i]];
+      message = databaseErors[item];
     }
-  }
-
+  });
   res
     .status(statusCode)
     .send({

@@ -19,7 +19,7 @@ export function checkAuthorization(req: Request, res: Response, next: NextFuncti
     return res
       .send(new Error401('Необходима авторизация'));
   }
-  //@ts-ignore
+  // @ts-ignore
   req.user = payload;
   next();
 }
