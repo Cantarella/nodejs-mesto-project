@@ -57,7 +57,7 @@ app.use((err: any, req: express.Request, res: express.Response) => {
   databaseErrorsKeys.forEach((item: tDatabaseErrorKey) => {
     const currentKey: tDatabaseErrorKey = item;
     if (err.stack.includes(currentKey)) {
-      statusCode = http2.constants.HTTP_STATUS_NOT_FOUND;
+      statusCode = currentKey;
       message = databaseErors[item];
     }
   });
@@ -73,7 +73,12 @@ app.use((err: any, req: express.Request, res: express.Response) => {
     });
 });
 app.use((req, res) => {
-  res.sendStatus(http2.constants.HTTP_STATUS_NOT_FOUND);
+  // res.sendStatus(http2.constants.HTTP_STATUS_NOT_FOUND);
+  res
+    .status(http2.constants.HTTP_STATUS_NOT_FOUND)
+    .send({
+      message: 'Обращение к несуществующему ресурсу',
+    });
 });
 app.listen(PORT, () => {
 });

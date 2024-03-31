@@ -22,41 +22,32 @@ export const createCard = (req: SessionRequest, res: Response, next: NextFunctio
 };
 
 export const deleteCard = (req: SessionRequest, res: Response, next: NextFunction) => {
-  if (req.user) {
-    const { id } = req.user;
-    return Card.deleteOne({ _id: req.params.cardId, owner: id })
-      .then((card) => {
-        if (!card) throw new Error404(' Карточка с указанным _id не найдена');
-        res.send({ data: 'Карточка успешно удалена' });
-      })
-      .catch(next);
-  }
+  const { id } = req.user;
+  return Card.deleteOne({ _id: req.params.cardId, owner: id })
+    .then((card) => {
+      if (!card) throw new Error404(' Карточка с указанным _id не найдена');
+      res.send({ data: 'Карточка успешно удалена' });
+    })
+    .catch(next);
 };
-
 export const addLikeToCard = (req: SessionRequest, res: Response, next: NextFunction) => {
-  if (req.user) {
-    const { id: userId } = req.user;
-    const { cardId } = req.params;
-    return Card.updateOne({ _id: cardId }, { $addToSet: { likes: userId } }, { new: true })
-      .orFail()
-      .then((card) => {
-        if (!card) throw new Error404('Передан несуществующий _id карточки');
-        res.send({ data: 'Лайк поставлен' });
-      })
-      .catch(next);
-  }
+  const { id: userId } = req.user;
+  const { cardId } = req.params;
+  return Card.updateOne({ _id: cardId }, { $addToSet: { likes: userId } }, { new: true })
+    .orFail()
+    .then((card) => {
+      res.send({ data: card });
+    })
+    .catch(next);
 };
 
 export const dislike = (req: SessionRequest, res: Response, next: NextFunction) => {
-  if (req.user) {
-    const { id: userId } = req.user;
-    const { cardId } = req.params;
-    return Card.updateOne({ _id: cardId }, { $pull: { likes: userId } }, { new: true })
-      .orFail()
-      .then((card) => {
-        if (!card) throw new Error404('Передан несуществующий _id карточки');
-        res.send({ data: 'Лайк отменён' });
-      })
-      .catch(next);
-  }
+  const { id: userId } = req.user;
+  const { cardId } = req.params;
+  return Card.updateOne({ _id: cardId }, { $pull: { likes: userId } }, { new: true })
+    .orFail()
+    .then((card) => {
+      res.send({ data: card });
+    })
+    .catch(next);
 };

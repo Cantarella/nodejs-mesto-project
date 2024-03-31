@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import Error500 from '../helpers/errors/Error500';
 import { SessionRequest } from '../middlewares/auth';
 import User from '../models/user';
 import Error404 from '../helpers/errors/Error404';
@@ -24,20 +23,16 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
   const {
     email, password, name, about, avatar,
   } = req.body;
-  const foundUser = await User.findOne({ email });
-  if (!foundUser) {
-    const hash = await bcrypt.hash(password, 10);
-    return User.create({
-      email,
-      password: hash,
-      name,
-      about,
-      avatar,
-    })
-      .then((user) => res.send({ data: user }))
-      .catch(next);
-  }
-  return next(new Error500('Такой пользователь уже есть в системе'));
+  const hash = await bcrypt.hash(password, 10);
+  return User.create({
+    email,
+    password: hash,
+    name,
+    about,
+    avatar,
+  })
+    .then((user) => res.send({ data: user }))
+    .catch(next);
 };
 
 export const getUserData = (req: Request, res: Response, next: NextFunction) => {
@@ -78,21 +73,16 @@ export const updateUser = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const updateAvatar = (req: SessionRequest, res: Response, next: NextFunction) => {
-  if (req.user) {
-    const { avatar } = req.body;
-    const { id: userId } = req.user;
-    return User.findOneAndUpdate(
-      { _id: userId },
-      { avatar },
-      { new: true, runValidators: true },
-    )
-      .orFail()
-      .then((user) => {
-        if (!user) {
-          throw new Error404('Пользователь с указанным _id не найден');
-        }
-        res.send({ data: user });
-      })
-      .catch(next);
-  }
+  const { avatar } = req.body;
+  const { id: userId } = req.user;
+  return User.findOneAndUpdate(
+    { _id: userId },
+    { avatar },
+    { new: true, runValidators: true },
+  )
+    .orFail()
+    .then((user) => {
+      res.send({ data: user });
+    })
+    .catch(next);
 };
