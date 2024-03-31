@@ -44,21 +44,28 @@ app.use(errorLogger);
 
 app.use(errors());
 app.use((err: any, req: express.Request, res: express.Response) => {
-  const databaseErors = {
-    ValidationError: 'Данные не прошли валидацию',
-    CastError: 'Невалидный id записи',
-    DocumentNotFoundError: 'В базе данных не найдена запись подходящая по параметрам запроса',
+  const databaseErrors = {
+    ValidationError: {
+      status: 412,
+      message: 'Данные не прошли валидацию',
+    },
+    CastError: {
+      status: 400,
+      message: 'Невалидный id записи',
+    },
+    DocumentNotFoundError: {
+      status: 406,
+      message: 'В базе данных не найдена запись подходящая по параметрам запроса',
+    },
   };
-  // eslint-disable-next-line prefer-const
   let { statusCode = 500, message } = err;
-  type tDatabaseErrorKey = keyof typeof databaseErors;
+  type tDatabaseErrorKey = keyof typeof databaseErrors;
 
-  const databaseErrorsKeys: tDatabaseErrorKey[] = Object.keys(databaseErors) as tDatabaseErrorKey[];
-  databaseErrorsKeys.forEach((item: tDatabaseErrorKey) => {
-    const currentKey: tDatabaseErrorKey = item;
-    if (err.stack.includes(currentKey)) {
-      statusCode = currentKey;
-      message = databaseErors[item];
+  const databaseErrorsKeys: tDatabaseErrorKey[] = Object.keys(databaseErrors) as tDatabaseErrorKey[];
+  databaseErrorsKeys.forEach((errorKey: tDatabaseErrorKey) => {
+    if (err.stack.includes(errorKey)) {
+      statusCode = databaseErrors[errorKey].status;
+      message = databaseErrors[errorKey].message;
     }
   });
   res
@@ -73,7 +80,6 @@ app.use((err: any, req: express.Request, res: express.Response) => {
     });
 });
 app.use((req, res) => {
-  // res.sendStatus(http2.constants.HTTP_STATUS_NOT_FOUND);
   res
     .status(http2.constants.HTTP_STATUS_NOT_FOUND)
     .send({
