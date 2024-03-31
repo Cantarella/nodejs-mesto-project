@@ -5,7 +5,6 @@ import Error404 from '../helpers/errors/Error404';
 import { SessionRequest } from '../middlewares/auth';
 
 export const getCards = async (req: Request, res: Response, next: NextFunction) => Card.find({})
-  .orFail()
   .then((cards) => res.send({ data: cards }))
   .catch(next);
 
