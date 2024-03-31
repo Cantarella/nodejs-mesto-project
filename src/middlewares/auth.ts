@@ -3,7 +3,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import Error401 from '../helpers/errors/Error401';
 
 export interface SessionRequest extends Request {
-  user?: {id: string} | JwtPayload;
+  user: {id: string} | JwtPayload;
 }
 
 export function checkAuthorization(req: Request, res: Response, next: NextFunction) {
