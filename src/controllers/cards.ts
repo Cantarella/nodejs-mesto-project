@@ -14,8 +14,9 @@ export const createCard = (req: SessionRequest, res: Response, next: NextFunctio
   return Card.create({ name, link, owner })
     .then((card) => {
       const { HTTP_STATUS_CREATED } = constants;
-      res.statusCode = HTTP_STATUS_CREATED;
-      return res.send({ data: card });
+      res
+        .status(HTTP_STATUS_CREATED)
+        .send({ data: card });
     })
     .catch(next);
 };

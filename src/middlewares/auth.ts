@@ -9,15 +9,13 @@ export interface SessionRequest extends Request {
 export function checkAuthorization(req: Request, res: Response, next: NextFunction) {
   const token = req.cookies.jwt;
   if (!token) {
-    return res
-      .send(new Error401('необходима авторизация'));
+    next(new Error401('необходима авторизация'));
   }
   let payload;
   try {
     payload = jwt.verify(token, 'some-secret-key');
   } catch (err) {
-    return res
-      .send(new Error401('Необходима авторизация'));
+    next(new Error401('необходима авторизация'));
   }
   // @ts-ignore
   req.user = payload;

@@ -5,9 +5,8 @@ interface iCard {
   link: string
   owner: Schema.Types.ObjectId
   likes: Schema.Types.ObjectId[]
-  createdAt: number
+  createdAt: Schema.Types.Date
 }
-
 const cardSchema = new Schema<iCard>({
   name: {
     type: String,
@@ -18,6 +17,12 @@ const cardSchema = new Schema<iCard>({
   link: {
     type: String,
     required: true,
+    validate: {
+      validator(v: string) {
+        return /^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*$/.test(v);
+      },
+      message: (props) => `${props.value} передана некорректная ссылка`,
+    },
   },
   owner: {
     type: Schema.Types.ObjectId,
@@ -30,7 +35,7 @@ const cardSchema = new Schema<iCard>({
     default: [],
   }],
   createdAt: {
-    type: Number,
+    type: Date,
     default: Date.now,
   },
 });

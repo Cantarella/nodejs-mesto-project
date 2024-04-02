@@ -29,6 +29,9 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8).max(16),
+    name: Joi.string().min(20).max(30),
+    about: Joi.string().min(2).max(200),
+    avatar: Joi.string().pattern(/^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*$/),
   }).unknown(true),
 }), createUser);
 app.post('/signin', celebrate({
@@ -44,23 +47,25 @@ app.use(errorLogger);
 
 app.use(errors());
 app.use((err: any, req: express.Request, res: express.Response) => {
+  const { HTTP_STATUS_NOT_FOUND, HTTP_STATUS_BAD_REQUEST } = http2.constants;
   const databaseErrors = {
     ValidationError: {
-      status: 412,
+      status: HTTP_STATUS_BAD_REQUEST,
       message: 'Данные не прошли валидацию',
     },
     CastError: {
-      status: 400,
+      status: HTTP_STATUS_BAD_REQUEST,
       message: 'Невалидный id записи',
     },
     DocumentNotFoundError: {
-      status: 406,
+      status: HTTP_STATUS_NOT_FOUND,
       message: 'В базе данных не найдена запись подходящая по параметрам запроса',
     },
   };
   let { statusCode = 500, message } = err;
   type tDatabaseErrorKey = keyof typeof databaseErrors;
 
+  // eslint-disable-next-line max-len
   const databaseErrorsKeys: tDatabaseErrorKey[] = Object.keys(databaseErrors) as tDatabaseErrorKey[];
   databaseErrorsKeys.forEach((errorKey: tDatabaseErrorKey) => {
     if (err.stack.includes(errorKey)) {
@@ -74,16 +79,9 @@ app.use((err: any, req: express.Request, res: express.Response) => {
       // eslint-disable-next-line no-nested-ternary
       message: statusCode === 500
         ? 'Ошибка по умолчанию'
-        : statusCode === 11000
-          ? 'Создание дублирующей записи'
+        : statusCode === HTTP_STATUS_NOT_FOUND
+          ? 'Обращение к несуществующему ресурсу'
           : message,
-    });
-});
-app.use((req, res) => {
-  res
-    .status(http2.constants.HTTP_STATUS_NOT_FOUND)
-    .send({
-      message: 'Обращение к несуществующему ресурсу',
     });
 });
 app.listen(PORT, () => {
