@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { constants } from 'http2';
 import Card from '../models/card';
-import Error404 from '../helpers/errors/Error404';
+import Error403 from '../helpers/errors/Error403';
 import { SessionRequest } from '../middlewares/auth';
 
 export const getCards = async (req: Request, res: Response, next: NextFunction) => Card.find({})
@@ -14,8 +14,9 @@ export const createCard = (req: SessionRequest, res: Response, next: NextFunctio
   return Card.create({ name, link, owner })
     .then((card) => {
       const { HTTP_STATUS_CREATED } = constants;
-      res.statusCode = HTTP_STATUS_CREATED;
-      return res.send({ data: card });
+      res
+        .status(HTTP_STATUS_CREATED)
+        .send({ data: card });
     })
     .catch(next);
 };
@@ -24,7 +25,7 @@ export const deleteCard = (req: SessionRequest, res: Response, next: NextFunctio
   const { id } = req.user;
   return Card.deleteOne({ _id: req.params.cardId, owner: id })
     .then((card) => {
-      if (!card) throw new Error404(' Карточка с указанным _id не найдена');
+      if (!card) next(new Error403('Запрет на удаление записи из базы'));
       res.send({ data: 'Карточка успешно удалена' });
     })
     .catch(next);

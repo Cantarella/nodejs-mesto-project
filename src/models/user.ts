@@ -2,6 +2,7 @@ import {
   model, Model, Schema, Document,
 } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import Error401 from '../helpers/errors/Error401';
 
 export interface IUser {
   name: string,
@@ -21,6 +22,12 @@ const userSchema = new Schema<IUser, UserModel>({
     type: String,
     required: true,
     unique: true,
+    validate: {
+      validator(v: string) {
+        return /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/.test(v);
+      },
+      message: (props) => `${props.value} email не прошел проверку на формат`,
+    },
   },
   password: {
     type: String,
@@ -32,14 +39,12 @@ const userSchema = new Schema<IUser, UserModel>({
     default: 'Жак-Ив Кусто',
     minlength: 20,
     maxlength: 30,
-    required: true,
   },
   about: {
     type: String,
     default: 'Исследователь',
     minlength: 2,
     maxlength: 200,
-    required: true,
   },
   avatar: {
     type: String,
@@ -50,7 +55,6 @@ const userSchema = new Schema<IUser, UserModel>({
       message: (props) => `${props.value} не валидная ссылка на аватар`,
     },
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
-    required: true,
   },
 });
 
@@ -58,11 +62,11 @@ userSchema.static('findUserByCredentials', function findUserByCredentials(email:
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Неправильные почта или пароль'));
+        return Promise.reject(new Error401('Неправильные почта или пароль'));
       }
       return bcrypt.compare(password, user.password).then((matched) => {
         if (!matched) {
-          return Promise.reject(new Error('Неправильные почта или пароль'));
+          return Promise.reject(new Error401('Неправильные почта или пароль'));
         }
         return user;
       });
