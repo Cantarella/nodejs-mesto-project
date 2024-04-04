@@ -42,7 +42,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     .catch((err) => {
       if (err.code === 11000) {
         return next(new Error409('Создание дублирующей записи'));
-      }
+      } return next(err);
     });
 };
 
