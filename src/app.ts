@@ -1,8 +1,8 @@
-import express, {NextFunction, Request, Response} from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import http2 from 'http2';
 import mongoose from 'mongoose';
 import { celebrate, errors, Joi } from 'celebrate';
-import Error404 from "./helpers/errors/Error404";
+import Error404 from './helpers/errors/Error404';
 import { checkAuthorization } from './middlewares/auth';
 import { createUser, login } from './controllers/users';
 import { cardsRouter, usersRouter } from './routes';
