@@ -1,7 +1,8 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import http2 from 'http2';
 import mongoose from 'mongoose';
 import { celebrate, errors, Joi } from 'celebrate';
+import Error404 from './helpers/errors/Error404';
 import { checkAuthorization } from './middlewares/auth';
 import { createUser, login } from './controllers/users';
 import { cardsRouter, usersRouter } from './routes';
@@ -43,6 +44,7 @@ app.post('/signin', celebrate({
 app.use(checkAuthorization);
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
+app.use((req: Request, res: Response, next: NextFunction) => next(new Error404('Обращение к несуществующему ресурсу')));
 app.use(errorLogger);
 
 app.use(errors());
@@ -79,9 +81,7 @@ app.use((err: any, req: express.Request, res: express.Response) => {
       // eslint-disable-next-line no-nested-ternary
       message: statusCode === 500
         ? 'Ошибка по умолчанию'
-        : statusCode === HTTP_STATUS_NOT_FOUND
-          ? 'Обращение к несуществующему ресурсу'
-          : message,
+        : message,
     });
 });
 app.listen(PORT, () => {

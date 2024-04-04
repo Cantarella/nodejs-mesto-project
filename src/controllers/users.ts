@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { constants } from 'http2';
 import jwt from 'jsonwebtoken';
-import Error409 from "../helpers/errors/Error409";
+import Error409 from '../helpers/errors/Error409';
 import { SessionRequest } from '../middlewares/auth';
 import User from '../models/user';
 import Error404 from '../helpers/errors/Error404';
@@ -42,7 +42,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     .catch((err) => {
       if (err.code === 11000) {
         return next(new Error409('Создание дублирующей записи'));
-      }
+      } return next(err);
     });
 };
 
