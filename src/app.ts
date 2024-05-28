@@ -23,7 +23,7 @@ app.use(cookieParser());
 app.use(allowCors);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-mongoose.connect('mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb');
+mongoose.connect('mongodb://127.0.0.1:27017');
 
 app.use(requestLogger);
 app.post('/signup', celebrate({
