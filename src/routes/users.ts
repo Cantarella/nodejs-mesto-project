@@ -31,6 +31,7 @@ usersRouter.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().required().pattern(/^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*$/),
   }),
+  // @ts-ignore
 }), updateAvatar);
 
 export default usersRouter;
