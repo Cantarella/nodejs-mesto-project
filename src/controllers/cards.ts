@@ -22,6 +22,7 @@ export const createCard = (req: SessionRequest, res: Response, next: NextFunctio
 };
 
 export const deleteCard = (req: SessionRequest, res: Response, next: NextFunction) => {
+  // @ts-ignore
   const { id } = req.user;
   return Card.deleteOne({ _id: req.params.cardId, owner: id })
     .then((card) => {
@@ -31,6 +32,7 @@ export const deleteCard = (req: SessionRequest, res: Response, next: NextFunctio
     .catch(next);
 };
 export const addLikeToCard = (req: SessionRequest, res: Response, next: NextFunction) => {
+  // @ts-ignore
   const { id: userId } = req.user;
   const { cardId } = req.params;
   return Card.updateOne({ _id: cardId }, { $addToSet: { likes: userId } }, { new: true })
@@ -42,6 +44,7 @@ export const addLikeToCard = (req: SessionRequest, res: Response, next: NextFunc
 };
 
 export const dislike = (req: SessionRequest, res: Response, next: NextFunction) => {
+  // @ts-ignore
   const { id: userId } = req.user;
   const { cardId } = req.params;
   return Card.updateOne({ _id: cardId }, { $pull: { likes: userId } }, { new: true })
