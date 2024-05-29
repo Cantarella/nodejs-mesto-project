@@ -8,7 +8,7 @@ export const getCards = async (req: Request, res: Response, next: NextFunction) 
   .then((cards) => res.send({ data: cards }))
   .catch(next);
 
-export const createCard = (req: SessionRequest, res: Response, next: NextFunction) => {
+export const createCard = (req: Request, res: Response, next: NextFunction) => {
   const { name, link } = req.body;
   const { owner } = req.body;
   return Card.create({ name, link, owner })

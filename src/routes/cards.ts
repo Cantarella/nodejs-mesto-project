@@ -20,17 +20,20 @@ cardsRouter.delete(
       userId: Joi.string().hex(),
     }),
   }),
+  // @ts-ignore
   deleteCard,
 );
 cardsRouter.put('/:cardId/likes', celebrate({
   params: Joi.object().keys({
     cardId: Joi.string().hex(),
   }),
+  // @ts-ignore
 }), addLikeToCard);
 cardsRouter.delete('/:cardId/likes', celebrate({
   params: Joi.object().keys({
     cardId: Joi.string().hex(),
   }),
+  // @ts-ignore
 }), dislike);
 
 export default cardsRouter;
