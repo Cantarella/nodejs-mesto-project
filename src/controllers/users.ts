@@ -85,6 +85,7 @@ export const updateUser = (req: Request, res: Response, next: NextFunction) => {
 
 export const updateAvatar = (req: SessionRequest, res: Response, next: NextFunction) => {
   const { avatar } = req.body;
+  // @ts-ignore
   const { id: userId } = req.user;
   return User.findOneAndUpdate(
     { _id: userId },
